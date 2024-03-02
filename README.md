@@ -38,21 +38,13 @@ Now the executable should be located in the configured `installdir` of `cabal` (
 The parser traverses the lambda term and creates AST where the nodes are variables, applications and abstractions (lexing and parsing are done simultaneously). Then the substitution is done on the AST with the corresponding tokens instead of directly on the term. After the substitution, a new lambda term is generated based on the newly created AST and the result is returned as the final answer. If there are no brackets, the application term is right associative. Bear in mind that in the generated final term some brackets may be added because there is no way to know where they can be skipped without looking ahead, which the current generator does not do.
 
 ### Grammar
-$`
-variable \Coloneqq [a-z] \\
-`$
+$` variable \Coloneqq [a-z] \\ `$
 
-$`
-λ-term \Coloneqq \langle variable \rangle \\
-`$
+$` λ-term \Coloneqq \langle variable \rangle \\ `$
 
-$`
-   \quad \quad \quad \quad \ \ | \quad (\!( \langleλ-term\rangle )\!)^* \ (\!( \langleλ-term\rangle )\!)^* \\
-`$
+$`   \quad \quad \quad \quad \ \ | \quad (\!( \langleλ-term\rangle )\!)^* \ (\!( \langleλ-term\rangle )\!)^* \\ `$
 
-$`
-   \quad \quad \quad \quad \ \ | \quad λ \ \langle variable\rangle \ . \ \langleλ-term\rangle
-`$
+$`   \quad \quad \quad \quad \ \ | \quad λ \ \langle variable\rangle \ . \ \langleλ-term\rangle `$
 
 (Here $` (\!( \ )\!)^* `$ means that the brackets themselves are optional)
 
