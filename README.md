@@ -54,7 +54,7 @@ variable \Coloneqq [a-z] \\
    \quad \quad \quad \quad \ \ | \quad λ \ \langle variable\rangle \ . \ \langleλ-term\rangle
 ```
 
-(Here $(\!( \ )\!)^*$ means that the brackets themselves are optional)
+(Here $` (\!( \ )\!)^* `$ means that the brackets themselves are optional)
 
 ### Substitution
 In order for the substitution to be correct and not change the semantics of the lambda terms, the algorithm uses **Curry substitution**. This means that in the cases where a naive substitution would cause a problem, the bound variables are renamed. The algorithm starts by trying all letters, starting from *a*, until a letter is found that would not cause the term to change its semantics and renames the bound variable with the found letter. If a suitable letter is not found, then the algorithm continues to search for any suitable character (which does not follow the grammar).
