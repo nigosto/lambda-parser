@@ -15,8 +15,8 @@ simpleAbstraction = "λx.x"
 abstraction :: String
 abstraction = "λx.xy"
 
-parens :: String
-parens = "(xy)"
+brackets :: String
+brackets = "(xy)"
 
 composed :: String
 composed = "(λx.(ab)x)(yz)"
@@ -34,7 +34,7 @@ allExamples = [
   complexApplication, 
   simpleAbstraction, 
   abstraction, 
-  parens, 
+  brackets, 
   composed, 
   currySubstitution1, 
   currySubstitution2 ]

@@ -7,17 +7,17 @@ data Token =
   Abstraction Char Token
   deriving (Show)
 
-takeWhileClosingParen :: String -> Int-> String
-takeWhileClosingParen ('(':xs) count = '(':takeWhileClosingParen xs (count + 1)
-takeWhileClosingParen (')':xs) 1 = ""
-takeWhileClosingParen (')':xs) count = ')':takeWhileClosingParen xs (count - 1)
-takeWhileClosingParen (x:xs) count = x:takeWhileClosingParen xs count
+takeWhileClosingBracket :: String -> Int-> String
+takeWhileClosingBracket ('(':xs) count = '(':takeWhileClosingBracket xs (count + 1)
+takeWhileClosingBracket (')':xs) 1 = ""
+takeWhileClosingBracket (')':xs) count = ')':takeWhileClosingBracket xs (count - 1)
+takeWhileClosingBracket (x:xs) count = x:takeWhileClosingBracket xs count
 
-dropWhileClosingParen :: String -> Int-> String
-dropWhileClosingParen ('(':xs) count = dropWhileClosingParen xs (count + 1)
-dropWhileClosingParen (')':xs) 1 = xs
-dropWhileClosingParen (')':xs) count = dropWhileClosingParen xs (count - 1)
-dropWhileClosingParen (x:xs) count = dropWhileClosingParen xs count
+dropWhileClosingBracket :: String -> Int-> String
+dropWhileClosingBracket ('(':xs) count = dropWhileClosingBracket xs (count + 1)
+dropWhileClosingBracket (')':xs) 1 = xs
+dropWhileClosingBracket (')':xs) count = dropWhileClosingBracket xs (count - 1)
+dropWhileClosingBracket (x:xs) count = dropWhileClosingBracket xs count
 
 invalidTermError :: String
 invalidTermError = "invalid term"
@@ -31,8 +31,8 @@ parseTerm ('λ':argument:'.':body)
   | isAlpha argument = Abstraction argument $ parseTerm body
   | otherwise = error invalidTermError
 
-parseTerm ('(':term) = let lhs = takeWhileClosingParen term 1
-                           rhs = dropWhileClosingParen term 1
+parseTerm ('(':term) = let lhs = takeWhileClosingBracket term 1
+                           rhs = dropWhileClosingBracket term 1
   in if length (init term) == length lhs 
      then parseTerm (init term) 
      else Application (parseTerm lhs) (parseTerm rhs)
