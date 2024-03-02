@@ -19,14 +19,17 @@ dropWhileClosingParen (')':xs) 1 = xs
 dropWhileClosingParen (')':xs) count = dropWhileClosingParen xs (count - 1)
 dropWhileClosingParen (x:xs) count = dropWhileClosingParen xs count
 
+invalidTermError :: String
+invalidTermError = "invalid term"
+
 parseTerm :: String -> Token
 parseTerm [var]
   | isAlpha var = Variable var
-  | otherwise = error "invalid term"
+  | otherwise = error invalidTermError
 
 parseTerm ('λ':argument:'.':body)
   | isAlpha argument = Abstraction argument $ parseTerm body
-  | otherwise = error "invalid term"
+  | otherwise = error invalidTermError
 
 parseTerm ('(':term) = let lhs = takeWhileClosingParen term 1
                            rhs = dropWhileClosingParen term 1
@@ -36,6 +39,6 @@ parseTerm ('(':term) = let lhs = takeWhileClosingParen term 1
 
 parseTerm (var:term)
   | isAlpha var = Application (Variable var) $ parseTerm term
-  | otherwise = error "invalid term"
+  | otherwise = error invalidTermError
 
-parseTerm _ = error "invalid term"
+parseTerm _ = error invalidTermError
