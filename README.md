@@ -40,8 +40,17 @@ The parser traverses the lambda term and creates AST where the nodes are variabl
 ### Grammar
 ```math
 variable \Coloneqq [a-z] \\
+```
+
+```math
 λ-term \Coloneqq \langle variable \rangle \\
+```
+
+```math
    \quad \quad \quad \quad \ \ | \quad (\!( \langleλ-term\rangle )\!)^* \ (\!( \langleλ-term\rangle )\!)^* \\
+```
+
+```math
    \quad \quad \quad \quad \ \ | \quad λ \ \langle variable\rangle \ . \ \langleλ-term\rangle
 ```
 
