@@ -1,4 +1,4 @@
-module Parser where
+module Parser (parseTerm, Token(Variable, Application, Abstraction)) where
 import Data.Char (isAlpha)
 
 data Token =

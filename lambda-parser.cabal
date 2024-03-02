@@ -30,6 +30,7 @@ executable lambda-parser
     other-modules:
         Examples.Terms
         Parser
+        Substitution
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

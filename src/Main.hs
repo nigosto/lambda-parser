@@ -1,7 +1,11 @@
 module Main where
 
-import Examples.Terms (variable, simpleAbstraction, simpleApplication, abstraction, complexApplication, composed, parens, allExamples)
-import Parser (parseTerm)
+import Examples.Terms (allExamples, simpleApplication, currySubstitution2)
+import Parser (parseTerm, Token (Variable))
+import Substitution (substitute)
+
+parseTest :: IO ()
+parseTest = mapM_ (print . parseTerm) allExamples
 
 main :: IO ()
-main = mapM_ (print . parseTerm) allExamples
+main = print $ substitute (parseTerm currySubstitution2) 'x' (Variable 'y')
