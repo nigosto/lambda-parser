@@ -1,10 +1,10 @@
-module Parser (parseTerm, Token(Variable, Application, Abstraction)) where
+module Parser (parseTerm, Term(Variable, Application, Abstraction)) where
 import Data.Char (isAlpha)
 
-data Token =
+data Term =
   Variable Char |
-  Application Token Token |
-  Abstraction Char Token
+  Application Term Term |
+  Abstraction Char Term
   deriving (Show)
 
 takeWhileClosingBracket :: String -> Int-> String
@@ -22,7 +22,7 @@ dropWhileClosingBracket (x:xs) count = dropWhileClosingBracket xs count
 invalidTermError :: String
 invalidTermError = "invalid term"
 
-parseTerm :: String -> Token
+parseTerm :: String -> Term
 parseTerm [var]
   | isAlpha var = Variable var
   | otherwise = error invalidTermError

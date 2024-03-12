@@ -30,11 +30,15 @@ executable lambda-parser
     other-modules:
         Examples.Terms
         Parser
-        Substitution
+        Transformer
+        Substitution.Named
+        Substitution.Nameless
         Generator
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends:    base ^>=4.17.2.0
+    build-depends:    
+        base ^>=4.17.2.0,
+        containers ^>= 0.7
     hs-source-dirs:   src
     default-language: Haskell2010

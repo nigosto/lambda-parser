@@ -1,14 +1,14 @@
-module Substitution where
+module Substitution.Named where
 
-import Parser (Token (Application, Variable, Abstraction))
+import Parser (Term (Application, Variable, Abstraction))
 import Data.Char (chr, ord)
 
-freeVariables :: Token -> [Char]
+freeVariables :: Term -> [Char]
 freeVariables (Variable x) = [x]
 freeVariables (Application lhs rhs) = freeVariables lhs ++ freeVariables rhs
 freeVariables (Abstraction argument body) = filter (/= argument) $ freeVariables body
 
-chooseUniqueVariable :: Token -> Token -> Char
+chooseUniqueVariable :: Term -> Term -> Char
 chooseUniqueVariable first second = let vars = freeVariables first ++ freeVariables second
   in chooseVariable vars 'a'
     where chooseVariable :: [Char] -> Char -> Char
@@ -16,7 +16,7 @@ chooseUniqueVariable first second = let vars = freeVariables first ++ freeVariab
             | current `notElem` vars = current
             | otherwise = chooseVariable vars $ chr $ ord current + 1
 
-substitute :: Token -> Char -> Token -> Token
+substitute :: Term -> Char -> Term -> Term
 substitute initial@(Variable var) x token
   | var == x = token
   | otherwise = initial
