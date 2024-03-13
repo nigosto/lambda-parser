@@ -1,5 +1,5 @@
 # lambda-parser
-Parser for lambda terms, written in Haskell, that is also able to apply substitution,  according to the rules of lambda calculus
+Parser for lambda terms, written in Haskell, that is also able to apply substitution, according to the rules of lambda calculus
 
 ## Table of contents
 - [Prerequisites](#prerequisites)
@@ -46,7 +46,9 @@ $`   \quad \quad \quad \quad \ \ | \quad λ \ \langle variable\rangle \ . \ \lan
 (Here $` (\!( \ )\!)^* `$ means that the brackets themselves are optional)
 
 ### Substitution
-In order for the substitution to be correct and not change the semantics of the lambda terms, the algorithm uses **Curry substitution**. This means that in the cases where a naive substitution would cause a problem, the bound variables are renamed. The algorithm starts by trying all letters, starting from *a*, until a letter is found that would not cause the term to change its semantics and renames the bound variable with the found letter. If a suitable letter is not found, then the algorithm continues to search for any suitable character (which does not follow the grammar).
+There are currently 2 supported versions for the substitutions:
+- curry substitution - this is the standart substitution, done directly on the original term. In order for it to be correct and not change the semantics of the lambda terms, in the cases where a naive substitution would cause a problem, the bound variables are renamed. The algorithm starts by trying all letters, starting from *a*, until a letter is found that would not cause the term to change its semantics and renames the bound variable with the found letter. If a suitable letter is not found, then the algorithm continues to search for any suitable character (which does not follow the grammar);
+- nameless term substitution - in order for this substitution to be applied the term is first transformed into nameless term. Nameless terms don't have variable names - instead de Bruijn indexes are used to denote which variables are bound and which - free. The substitution is then done on the indexes instead of the variables by utilizing the `shift` function. After the substitution is done, the term is transformed back into its named version, where the bound variables may have different names (which does not change the semantics of the term).
 
 ## License
 The project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for more information.

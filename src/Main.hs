@@ -9,6 +9,8 @@ import System.IO (BufferMode (BlockBuffering), hSetBuffering, stdout)
 import Transformer (toNamed, toNameless)
 import Prelude hiding (lookup)
 
+-- TODO: let the user decide which substitution to be used and how the
+--       result should be displayed - either as named or nameless term
 main :: IO ()
 main = do
   hSetBuffering stdout $ BlockBuffering $ Just 1
