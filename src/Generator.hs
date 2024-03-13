@@ -14,4 +14,4 @@ generateNamelessTerm (NamelessVariable var) = show var
 generateNamelessTerm (NamelessApplication lhs rhs) = concatMap (\term -> case term of
   var@(NamelessVariable _) -> generateNamelessTerm var
   _ -> '(':generateNamelessTerm term ++ [')']) [lhs, rhs]
-generateNamelessTerm (NamelessAbstraction depth body) = 'λ':generateNamelessTerm body
+generateNamelessTerm (NamelessAbstraction body) = 'λ':generateNamelessTerm body
