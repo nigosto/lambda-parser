@@ -35,8 +35,8 @@ toNamelessWithContext (Abstraction argument body) depth bv context =
     in (NamelessAbstraction (fst namelessBody), snd namelessBody)
     where insertBoundVariable var bv = if var `elem` bv then bv else var:bv
 
-toNameless :: Term -> (NamelessTerm, NamingContext)
-toNameless term = toNamelessWithContext term 0 [] empty
+toNameless :: Term -> NamingContext -> (NamelessTerm, NamingContext)
+toNameless term = toNamelessWithContext term 0 []
 
 toNamedWithContext :: NamelessTerm  -> BoundVariables -> NamingContext -> Term
 toNamedWithContext (NamelessVariable var) bv context

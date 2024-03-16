@@ -35,7 +35,7 @@ cabal install
 Now the executable should be located in the configured `installdir` of `cabal` (usually `~/.local/bin` or `~/.cabal/bin`).
 
 ## Documentation
-The parser traverses the lambda term and creates AST where the nodes are variables, applications and abstractions (lexing and parsing are done simultaneously). Then the substitution is done on the AST with the corresponding tokens instead of directly on the term. After the substitution, a new lambda term is generated based on the newly created AST and the result is returned as the final answer. If there are no brackets, the application term is right associative. Bear in mind that in the generated final term some brackets may be added because there is no way to know where they can be skipped without looking ahead, which the current generator does not do.
+The parser traverses the lambda term and creates AST where the nodes are variables, applications and abstractions (lexing and parsing are done simultaneously). Then the substitution is done on the AST with the corresponding tokens instead of directly on the term. After the substitution, a new lambda term is generated based on the newly created AST and the result is returned as the final answer. If there are no brackets, the application term is left associative. Bear in mind that in the generated final term some brackets may be added because there is no way to know where they can be skipped without looking ahead, which the current generator does not do.
 
 ### Grammar
 $` variable \Coloneqq [a-z] `$ <br>
