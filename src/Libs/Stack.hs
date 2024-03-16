@@ -1,4 +1,4 @@
-module Stack where
+module Libs.Stack where
 
 type Stack t = [t]
 

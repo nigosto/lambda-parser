@@ -1,7 +1,7 @@
 module Parser (parseTerm, Term(Variable, Application, Abstraction)) where
+
 import Data.Char (isAlpha)
-import Debug.Trace (trace)
-import Stack (Stack, peek, pop, emptyStack, push)
+import Libs.Stack (Stack, peek, pop, emptyStack, push)
 
 data Term =
   Variable Char |

@@ -7,7 +7,7 @@ simpleApplication :: String
 simpleApplication = "xy"
 
 complexApplication :: String
-complexApplication = "(xy)z"
+complexApplication = "xyz"
 
 simpleAbstraction :: String
 simpleAbstraction = "λx.x"
@@ -19,13 +19,22 @@ brackets :: String
 brackets = "(xy)"
 
 composed :: String
-composed = "(λx.(ab)x)(yz)"
+composed = "(λx.abx)(yz)"
 
 currySubstitution1 :: String
 currySubstitution1 = "λy.yλa.ax"
 
 currySubstitution2 :: String
 currySubstitution2 = "λy.λa.yax"
+
+betaRedexes :: String
+betaRedexes = "(λx.x)((λy.y)z)u"
+
+singleBetaRedex :: String
+singleBetaRedex = "λz.(λx.λy.x)(λu.u)(λu.uzu)z"
+
+complexBetaRedexes :: String
+complexBetaRedexes = "(λx.xz)((λy.zy)z)"
 
 allExamples :: [String]
 allExamples = [
@@ -37,4 +46,7 @@ allExamples = [
   brackets, 
   composed, 
   currySubstitution1, 
-  currySubstitution2 ]
+  currySubstitution2,
+  betaRedexes,
+  singleBetaRedex,
+  complexBetaRedexes ]

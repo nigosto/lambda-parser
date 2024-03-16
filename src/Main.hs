@@ -1,14 +1,6 @@
 module Main where
 
-import Data.Map (empty, lookup)
-import Generator (generateNamelessTerm, generateTerm)
-import Parser (Term (Variable), parseTerm)
-import Substitution.Named (substitute)
-import Substitution.Nameless (substituteNameless)
 import System.IO (BufferMode (BlockBuffering), hSetBuffering, stdout)
-import Transformer (toNamed, toNameless)
-import Prelude hiding (lookup)
-import Stack (emptyStack)
 import Interaction (getSubstitutionType, getOutputTermType, doSubstituteNameless, TermType (Named), doSubstituteNamed)
 
 main :: IO ()

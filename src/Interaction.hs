@@ -3,7 +3,7 @@ module Interaction where
 import Prelude hiding (lookup)
 import Generator (generateTerm, generateNamelessTerm)
 import Parser (parseTerm)
-import Stack (emptyStack)
+import Libs.Stack (emptyStack)
 import Substitution.Named (substitute)
 import Transformer (toNameless, toNamed)
 import Data.Map (empty, lookup)

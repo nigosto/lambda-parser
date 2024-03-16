@@ -29,13 +29,14 @@ executable lambda-parser
     -- Modules included in this executable, other than Main.
     other-modules:
         Examples.Terms
+        Interaction
         Parser
         Transformer
+        Generator
         Substitution.Named
         Substitution.Nameless
-        Generator
-        Stack
-        Interaction
+        Libs.Stack
+        Libs.BetaRedexes
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
