@@ -1,13 +1,8 @@
-module Parser (parseTerm, Term(Variable, Application, Abstraction)) where
+module Parser (parseTerm) where
 
 import Data.Char (isAlpha)
 import Libs.Stack (Stack, peek, pop, emptyStack, push)
-
-data Term =
-  Variable Char |
-  Application Term Term |
-  Abstraction Char Term
-  deriving (Show)
+import Terms (Term (..))
 
 takeWhileClosingBracket :: String -> Int-> String
 takeWhileClosingBracket ('(':xs) count = '(':takeWhileClosingBracket xs (count + 1)

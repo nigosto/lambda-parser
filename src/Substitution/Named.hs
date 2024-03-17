@@ -1,12 +1,8 @@
 module Substitution.Named where
 
-import Parser (Term (Application, Variable, Abstraction))
+import Terms (Term (Application, Variable, Abstraction))
 import Data.Char (chr, ord)
-
-freeVariables :: Term -> [Char]
-freeVariables (Variable x) = [x]
-freeVariables (Application lhs rhs) = freeVariables lhs ++ freeVariables rhs
-freeVariables (Abstraction argument body) = filter (/= argument) $ freeVariables body
+import Utils.Variables (freeVariables)
 
 chooseUniqueVariable :: Term -> Term -> Char
 chooseUniqueVariable first second = let vars = freeVariables first ++ freeVariables second

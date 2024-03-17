@@ -31,12 +31,14 @@ executable lambda-parser
         Examples.Terms
         Interaction
         Parser
-        Transformer
-        Generator
+        Transformers
+        Generators
         Substitution.Named
         Substitution.Nameless
         Libs.Stack
         Libs.BetaRedexes
+        Utils.Variables
+        Terms
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

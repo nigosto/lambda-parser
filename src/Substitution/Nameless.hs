@@ -1,5 +1,5 @@
 module Substitution.Nameless where
-import Transformer (NamelessTerm (NamelessVariable, NamelessApplication, NamelessAbstraction), NamingContext)
+import Terms (NamelessTerm (..))
 
 shift :: Int -> Int -> NamelessTerm -> NamelessTerm
 shift c d var@(NamelessVariable k)
