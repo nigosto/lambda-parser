@@ -4,6 +4,7 @@ Parser for lambda terms, written in Haskell, that is also able to execute a list
 ## Table of contents
 - [Prerequisites](#prerequisites)
 - [Running the project](#running-the-project)
+- [Running the tests](#running-the-tests)
 - [Installing the executable manually](#installing-the-executable-manually)
 - [Documentation](#documentation)
     - [Grammar](#grammar)
@@ -19,7 +20,7 @@ Parser for lambda terms, written in Haskell, that is also able to execute a list
 - cabal 3.6.2.1 or newer
 
 ## Running the project
-Running the project using `cabal`:
+Run the project using `cabal`:
 ```shell
 cabal run
 ```
@@ -27,6 +28,11 @@ cabal run
 If you want to run it in REPL:
 ```shell
 cabal repl
+```
+
+## Running the tests
+```shell
+cabal test --test-show-details=streaming
 ```
 
 ## Installing the executable manually

@@ -1,4 +1,5 @@
-module Libs.BetaRedexes where
+module BetaRedexes where
+  
 import Terms (Term (..))
 import Generators (generateTerm)
 

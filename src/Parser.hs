@@ -1,7 +1,7 @@
 module Parser (parseTerm) where
 
 import Data.Char (isAlpha)
-import Libs.Stack (Stack, peek, pop, emptyStack, push)
+import Stack (Stack, peek, pop, emptyStack, push)
 import Terms (Term (..))
 
 takeWhileClosingBracket :: String -> Int-> String

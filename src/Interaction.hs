@@ -3,12 +3,12 @@ module Interaction where
 import Prelude hiding (lookup)
 import Generators (generateTerm, generateNamelessTerm, generateApplicativeTerm)
 import Parser (parseTerm)
-import Libs.Stack (emptyStack)
+import Stack (emptyStack)
 import Substitution.Named (substitute)
 import Transformers (toNameless, toNamed, toApplicative)
 import Data.Map (empty, lookup)
 import Substitution.Nameless (substituteNameless)
-import Libs.BetaRedexes (extractBetaRedexes)
+import BetaRedexes (extractBetaRedexes)
 
 requestMode :: IO Int
 requestMode = do

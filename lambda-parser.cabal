@@ -23,6 +23,14 @@ extra-source-files:
     CHANGELOG.md
     README.md
 
+library lambda-parser-lib
+    exposed-modules: 
+        Stack,
+        Parser
+    hs-source-dirs: lib
+    build-depends: base ^>=4.17.2.0
+    default-language: Haskell2010
+
 executable lambda-parser
     main-is:          Main.hs
 
@@ -35,8 +43,7 @@ executable lambda-parser
         Generators
         Substitution.Named
         Substitution.Nameless
-        Libs.Stack
-        Libs.BetaRedexes
+        BetaRedexes
         Utils.Variables
         Terms
 
@@ -44,6 +51,19 @@ executable lambda-parser
     -- other-extensions:
     build-depends:    
         base ^>=4.17.2.0,
-        containers ^>= 0.7
+        containers ^>= 0.7,
+        lambda-parser-lib
     hs-source-dirs:   src
     default-language: Haskell2010
+
+test-suite tests
+    type: exitcode-stdio-1.0
+    main-is: Main.hs
+    hs-source-dirs: test
+    default-language: Haskell2010
+    build-depends:
+        base ^>=4.17.2.0,
+        HUnit ^>=1.6,
+        lambda-parser-lib
+    other-modules:
+        Suites.Parser
