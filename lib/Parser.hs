@@ -1,20 +1,27 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 
 module Parser where
-import Data.Bifunctor
+
 import Control.Applicative
+import Control.Monad
+import Data.Bifunctor
 import Data.Char (isAlpha, isDigit)
-import Data.List.NonEmpty (NonEmpty, fromList, cons)
+import Data.List.NonEmpty (NonEmpty ((:|)), cons, fromList, toList)
 import Debug.Trace (trace)
 
-data Term =
-  Variable String |
-  Application Term Term |
-  Abstraction String Term
+data Term
+  = Variable String
+  | Application Term Term
+  | Abstraction String Term
   deriving (Show, Eq)
 
-data ParsingError = EndOfLine | UnexpectedCharacter Char 
+data ParsingError
+  = EndOfLine
+  | UnexpectedCharacter Char
+  | InvalidOperands
+  | InputNotExhausted
   deriving (Eq, Show)
 
 newtype Parser a = Parser {run :: String -> Either ParsingError (a, String)}
@@ -49,24 +56,34 @@ instance Alternative Parser where
       Left error -> p2 input
       Right (output, rest) -> Right (output, rest)
 
-(<@>) :: Parser a -> Parser [a] -> Parser [a]
-p1 <@> p2 = (:) <$> p1 <*> p2
+instance MonadPlus Parser
+
+isIdentifier :: Char -> Bool
+isIdentifier c = isAlpha c && 'λ' /= c
+
+(<:>) :: Parser a -> Parser [a] -> Parser [a]
+p1 <:> p2 = liftA2 (:) p1 p2
+
+peek :: Parser a -> Parser a
+peek (Parser p) = Parser $ \input -> do
+  (output, _) <- p input
+  Right (output, input)
+
+withEmpty :: Parser a -> Parser [b]
+withEmpty p = [] <$ p
 
 satisfy :: (Char -> Bool) -> Parser Char
 satisfy predicate = Parser $ \case
-    [] -> Left EndOfLine
-    x:xs
-      | predicate x -> Right (x, xs)
-      | otherwise -> Left $ UnexpectedCharacter x
+  [] -> Left EndOfLine
+  x : xs
+    | predicate x -> Right (x, xs)
+    | otherwise -> Left $ UnexpectedCharacter x
 
 char :: Char -> Parser Char
 char c = satisfy (== c)
 
-alphaChar :: Parser Char
-alphaChar = satisfy (\x -> isAlpha x && x /= 'λ')
-
-string :: String -> Parser String
-string = traverse char
+identifier :: Parser Char
+identifier = satisfy isIdentifier
 
 digit :: Parser Char
 digit = satisfy isDigit
@@ -74,43 +91,45 @@ digit = satisfy isDigit
 integer :: Parser String
 integer = many digit
 
+eof :: Parser ()
+eof = Parser $ \case
+  [] -> Right ((), [])
+  _ -> Left InputNotExhausted
+
 variable :: Parser String
-variable = alphaChar <@> integer
-
-parseVariable :: Parser Term
-parseVariable = Variable <$> variable
-
-parseAbstraction :: Parser Term
-parseAbstraction = uncurry Abstraction <$> ((char 'λ' *> ((,) <$> variable) <* char '.') <*> parseTerm)
-
--- Abstraction is not atomic, because it needs to be wrapped in braces if it needs to be
--- the left argument of the application
-atomicExpression :: Parser Term
-atomicExpression = parseVariable <|> (char '(' *> parseTerm <* char ')')
-
-end :: Parser [Term]
-end = Parser $ \input -> case input of
-  [] -> Right ([], [])
-  (x:xs) -> if isAlpha x && x /= 'λ' then Left $ UnexpectedCharacter $ head input else Right ([], input)
+variable = identifier <:> integer
 
 -- Break the left-recursive grammar using additional rules.
-applicative :: Parser [Term]
-applicative = nonEmptyApplicative <|> end
+applicationOperator :: Parser Term
+applicationOperator = parseVariableTerm <|> (char '(' *> parseTerm <* char ')')
 
-nonEmptyApplicative :: Parser [Term]
-nonEmptyApplicative = (atomicExpression <|> parseAbstraction) <@> applicative
+applicationEnd :: Parser [Term]
+applicationEnd = withEmpty eof <|> (withEmpty . peek . satisfy $ (not . isIdentifier))
+
+applicationOperand :: Parser [Term]
+applicationOperand = toList <$> nonEmptyApplicationOperand <|> applicationEnd
+
+nonEmptyApplicationOperand :: Parser (NonEmpty Term)
+nonEmptyApplicationOperand = fromList <$> (applicationOperator <|> parseAbstractionTerm) <:> applicationOperand
 
 -- In order to keep the application left-associative, first parse every
 -- subterm of the application chain separately and after than combine them
--- into one application chain.
-concatApplications :: [Term] -> Term
-concatApplications g = foldl Application (Application (head g) (head $ tail g)) (tail $ tail g)
+-- into a single nested application.
+concatApplications :: NonEmpty Term -> Parser Term
+concatApplications (x :| []) = Parser $ const $ Left InvalidOperands
+concatApplications terms = Parser $ Right . (foldl1 Application terms,)
 
-parseApplication :: Parser Term
-parseApplication =  concatApplications <$> (atomicExpression <@> nonEmptyApplicative)
+parseVariableTerm :: Parser Term
+parseVariableTerm = Variable <$> variable
+
+parseApplicationTerm :: Parser Term
+parseApplicationTerm = liftA2 cons applicationOperator nonEmptyApplicationOperand >>= concatApplications
+
+parseAbstractionTerm :: Parser Term
+parseAbstractionTerm = uncurry Abstraction <$> liftA2 (,) (char 'λ' *> variable <* char '.') parseTerm
 
 parseTerm :: Parser Term
-parseTerm = parseAbstraction <|> parseApplication <|> parseVariable
+parseTerm = msum [parseAbstractionTerm, parseApplicationTerm, parseVariableTerm]
 
 parse :: String -> Either ParsingError Term
 parse input = fst <$> run parseTerm input
