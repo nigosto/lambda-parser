@@ -22,7 +22,7 @@ Parser for lambda terms, written in Haskell, that is also able to execute a list
 ## Running the project
 Run the project using `cabal`:
 ```shell
-cabal run
+cabal run lambda-parser
 ```
 
 If you want to run it in REPL:
@@ -47,7 +47,7 @@ Now the executable should be located in the configured `installdir` of `cabal` (
 The parser traverses the lambda term and creates AST where the nodes are variables, applications and abstractions (lexing and parsing are done simultaneously). Then the operations are done on the AST with the corresponding tokens instead of directly on the term. After the operation, a new lambda term is generated based on the newly created AST and the result is returned as the final answer. If there are no brackets, the application term is left associative. Bear in mind that in the generated final term some brackets may be added because there is no way to know where they can be skipped without looking ahead, which the current generator does not do.
 
 ### Grammar
-$` variable \Coloneqq [a-z] `$ <br>
+$` variable \Coloneqq [a-z][1-9]^* `$ <br>
 $` λ-term \Coloneqq \langle variable \rangle `$ <br>
 $`   \quad \quad \quad \quad \ \ | \quad (\!( \langleλ-term\rangle )\!)^* \ (\!( \langleλ-term\rangle )\!)^* `$ <br>
 $`   \quad \quad \quad \quad \ \ | \quad λ \ \langle variable\rangle \ . \ \langleλ-term\rangle `$

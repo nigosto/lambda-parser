@@ -1,9 +1,9 @@
 module Terms where
 
 data Term =
-  Variable Char |
+  Variable String |
   Application Term Term |
-  Abstraction Char Term
+  Abstraction String Term
   deriving (Show, Eq)
 
 data NamelessTerm
@@ -15,7 +15,7 @@ data NamelessTerm
 data Combinator = KCombinator | SCombinator deriving (Eq)
 
 data ApplicativeTerm
-  = ApplicativeVariable Char
+  = ApplicativeVariable String
   | ApplicativeApplication ApplicativeTerm ApplicativeTerm
   | ApplicativeCombinator Combinator
   deriving (Eq)

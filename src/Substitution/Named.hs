@@ -4,15 +4,16 @@ import Terms (Term (Application, Variable, Abstraction))
 import Data.Char (chr, ord)
 import Utils.Variables (freeVariables)
 
-chooseUniqueVariable :: Term -> Term -> Char
+chooseUniqueVariable :: Term -> Term -> String
 chooseUniqueVariable first second = let vars = freeVariables first ++ freeVariables second
-  in chooseVariable vars 'a'
-    where chooseVariable :: [Char] -> Char -> Char
+  in chooseVariable vars "a"
+    where chooseVariable :: [String] -> String -> String
           chooseVariable vars current
             | current `notElem` vars = current
-            | otherwise = chooseVariable vars $ chr $ ord current + 1
+            -- TODO: fix
+            | otherwise = chooseVariable vars $ show $ chr $ ord (head current) + 1
 
-substitute :: Term -> Char -> Term -> Term
+substitute :: Term -> String -> Term -> Term
 substitute initial@(Variable var) x token
   | var == x = token
   | otherwise = initial

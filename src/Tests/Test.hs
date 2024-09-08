@@ -2,7 +2,7 @@ module Main where
 
 import Test.HUnit
 import qualified System.Exit as Exit
-import Suites.Parser (parserTests)
+import Tests.Parser (parserTests)
 
 tests :: Test
 tests = TestList [parserTests] 

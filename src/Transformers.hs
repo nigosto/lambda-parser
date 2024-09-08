@@ -1,6 +1,5 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-{-# HLINT ignore "Use first" #-}
 module Transformers where
 
 import Data.Char (chr, ord)
@@ -9,10 +8,14 @@ import Data.Map (Map, empty, findMin, foldrWithKey, insert, keys, lookup, member
 import Prelude hiding (lookup)
 import Utils.Variables (freeVariables, applicativeFreeVariables)
 import Terms (Term (..), NamelessTerm (..), ApplicativeTerm (..), Combinator (..))
+import Data.Bifunctor
 
-type NamingContext = Map Char Int
+type NamingContext = Map String Int
+type BoundVariables = [String]
+type VariableIndex = Int
 
-type BoundVariables = [Char]
+getVariableIdentifier :: String -> Char
+getVariableIdentifier = head
 
 toNamelessWithContext :: Term -> Int -> BoundVariables -> NamingContext -> (NamelessTerm, NamingContext)
 toNamelessWithContext (Variable var) depth bv context = case var `elemIndex` bv of
@@ -25,10 +28,10 @@ toNamelessWithContext (Variable var) depth bv context = case var `elemIndex` bv 
 toNamelessWithContext (Application lhs rhs) depth bv context =
   let namelessLhs = toNamelessWithContext lhs depth bv context
       namelessRhs = toNamelessWithContext rhs depth bv (snd namelessLhs)
-   in (NamelessApplication (fst namelessLhs) (fst namelessRhs), snd namelessRhs)
+   in first (NamelessApplication (fst namelessLhs)) namelessRhs
 toNamelessWithContext (Abstraction argument body) depth bv context =
   let namelessBody = toNamelessWithContext body (depth + 1) (insertBoundVariable argument bv) context
-   in (NamelessAbstraction (fst namelessBody), snd namelessBody)
+   in first NamelessAbstraction namelessBody
   where
     insertBoundVariable var bv = if var `elem` bv then bv else var : bv
 
@@ -46,8 +49,8 @@ toNamedWithContext (NamelessAbstraction body) bv context =
    in Abstraction (head updatedBoundVariables) (toNamedWithContext body updatedBoundVariables context)
   where
     extendBoundVariables :: BoundVariables -> BoundVariables
-    extendBoundVariables [] = if 'a' `member` context then [nextVariable 'a' context] else "a"
-    extendBoundVariables bv@(x : _) = nextVariable x context : bv
+    extendBoundVariables [] = if "a" `member` context then [nextVariable "a" 0] else ["a0"]
+    extendBoundVariables bv@(x : _) = nextVariable x (length bv) : bv
 
 toNamed :: NamelessTerm -> NamingContext -> Term
 toNamed term = toNamedWithContext term []
@@ -55,10 +58,8 @@ toNamed term = toNamedWithContext term []
 findKey :: (Eq v) => v -> Map k v -> k
 findKey value map = foldrWithKey (\k v res -> if v == value then k else res) (fst $ findMin map) map
 
-nextVariable :: Char -> NamingContext -> Char
-nextVariable var context =
-  let next = chr $ ord var + 1
-   in if next `member` context then nextVariable next context else next
+nextVariable :: String -> VariableIndex -> String
+nextVariable var index = getVariableIdentifier var : show index
 
 toApplicative :: Term -> ApplicativeTerm
 toApplicative (Variable var) = ApplicativeVariable var
@@ -70,7 +71,7 @@ toApplicative (Abstraction argument body)
                             ApplicativeCombinator KCombinator
   | argument `notElem` freeVariables body = ApplicativeApplication (ApplicativeCombinator KCombinator) $ toApplicative body
   | otherwise = case body of
-    Application lhs rhs -> 
+    Application lhs rhs ->
       ApplicativeApplication (ApplicativeApplication (ApplicativeCombinator SCombinator) $
                                                       toApplicative (Abstraction argument lhs)) $
                               toApplicative (Abstraction argument rhs)
@@ -80,9 +81,9 @@ toApplicative (Abstraction argument body)
 -- applicative term is not deterministic. The following function
 -- is used when the transformation has begun from the inside and
 -- is currently backtracking with the incomplete term
-toApplicativePartialAbstraction :: Char -> ApplicativeTerm -> ApplicativeTerm
+toApplicativePartialAbstraction :: String -> ApplicativeTerm -> ApplicativeTerm
 toApplicativePartialAbstraction argument term
-  | term == ApplicativeVariable argument = 
+  | term == ApplicativeVariable argument =
     ApplicativeApplication (ApplicativeApplication (ApplicativeCombinator SCombinator) $
                                                     ApplicativeCombinator KCombinator) $
                             ApplicativeCombinator KCombinator

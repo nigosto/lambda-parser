@@ -1,42 +1,15 @@
 cabal-version:      2.4
 name:               lambda-parser
 version:            0.1.0.0
-
--- A short (one-line) description of the package.
--- synopsis:
-
--- A longer description of the package.
--- description:
-
--- A URL where users can report bugs.
--- bug-reports:
-
--- The license under which the package is released.
--- license:
 author:             nigosto
 maintainer:         nigosto@gmail.com
-
--- A copyright notice.
--- copyright:
--- category:
 extra-source-files:
     CHANGELOG.md
     README.md
 
-library lambda-parser-lib
-    exposed-modules: 
-        Stack,
-        Parser
-    hs-source-dirs: lib
-    build-depends: base ^>=4.17.2.0    
-    default-language: Haskell2010
-
 executable lambda-parser
     main-is:          Main.hs
-
-    -- Modules included in this executable, other than Main.
     other-modules:
-        Examples.Terms
         Interaction
         Parser
         Transformers
@@ -46,24 +19,31 @@ executable lambda-parser
         BetaRedexes
         Utils.Variables
         Terms
-
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
+        Libs.Parser
     build-depends:    
         base ^>=4.17.2.0,
-        containers ^>= 0.7,
-        lambda-parser-lib
+        containers ^>= 0.7
     hs-source-dirs:   src
     default-language: Haskell2010
 
 test-suite tests
     type: exitcode-stdio-1.0
-    main-is: Main.hs
-    hs-source-dirs: test
+    hs-source-dirs: src src/Tests
+    main-is: Test.hs
     default-language: Haskell2010
     build-depends:
         base ^>=4.17.2.0,
         HUnit ^>=1.6,
-        lambda-parser-lib
+        containers ^>= 0.7
     other-modules:
-        Suites.Parser
+        Tests.Parser
+        Interaction
+        Parser
+        Transformers
+        Generators
+        Substitution.Named
+        Substitution.Nameless
+        BetaRedexes
+        Utils.Variables
+        Terms
+        Libs.Parser

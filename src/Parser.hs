@@ -1,36 +1,47 @@
-module Parser (parseTerm) where
+{-# LANGUAGE TupleSections #-}
 
-import Data.Char (isAlpha)
-import Stack (Stack, peek, pop, emptyStack, push)
-import Terms (Term (..))
+module Parser where
 
-takeWhileClosingBracket :: String -> Int-> String
-takeWhileClosingBracket ('(':xs) count = '(':takeWhileClosingBracket xs (count + 1)
-takeWhileClosingBracket (')':xs) 1 = ""
-takeWhileClosingBracket (')':xs) count = ')':takeWhileClosingBracket xs (count - 1)
-takeWhileClosingBracket (x:xs) count = x:takeWhileClosingBracket xs count
+import Libs.Parser
+import Terms
+import Data.List.NonEmpty (NonEmpty ((:|)), cons, fromList, toList)
+import Control.Applicative
+import Control.Monad
 
-dropWhileClosingBracket :: String -> Int-> String
-dropWhileClosingBracket ('(':xs) count = dropWhileClosingBracket xs (count + 1)
-dropWhileClosingBracket (')':xs) 1 = xs
-dropWhileClosingBracket (')':xs) count = dropWhileClosingBracket xs (count - 1)
-dropWhileClosingBracket (x:xs) count = dropWhileClosingBracket xs count
+variable :: Parser String
+variable = identifier <:> integer
 
-invalidTermError :: String
-invalidTermError = "invalid term"
+-- Break the left-recursive grammar using additional rules.
+applicationOperator :: Parser Term
+applicationOperator = parseVariableTerm <|> (char '(' *> parseTerm <* char ')')
 
-parseTerm :: String -> Stack Term -> Term
-parseTerm "" [term] = term
-parseTerm "" stack = let rhs = peek stack
-                         lhs = peek $ pop stack
-                         updatedStack = pop stack
-  in Application (parseTerm "" updatedStack) rhs
-parseTerm term@('λ':argument:'.':body) stack
-  | isAlpha argument = parseTerm "" (push stack (Abstraction argument (parseTerm body emptyStack)))
-  | otherwise = error invalidTermError
-parseTerm ('(':rest) stack = let lhs = takeWhileClosingBracket rest 1
-                                 rhs = dropWhileClosingBracket rest 1
-  in parseTerm rhs (push stack (parseTerm lhs emptyStack))
-parseTerm (var:rest) stack
-  | isAlpha var = parseTerm rest (push stack (Variable var))
-  | otherwise = error invalidTermError
+applicationEnd :: Parser [Term]
+applicationEnd = withEmpty eof <|> (withEmpty . peek . satisfy $ (not . isIdentifier))
+
+applicationOperand :: Parser [Term]
+applicationOperand = toList <$> nonEmptyApplicationOperand <|> applicationEnd
+
+nonEmptyApplicationOperand :: Parser (NonEmpty Term)
+nonEmptyApplicationOperand = fromList <$> (applicationOperator <|> parseAbstractionTerm) <:> applicationOperand
+
+-- In order to keep the application left-associative, first parse every
+-- subterm of the application chain separately and after than combine them
+-- into a single nested application.
+concatApplications :: NonEmpty Term -> Parser Term
+concatApplications (x :| []) = Parser $ const $ Left InvalidOperands
+concatApplications terms = Parser $ Right . (foldl1 Application terms,)
+
+parseVariableTerm :: Parser Term
+parseVariableTerm = Variable <$> variable
+
+parseApplicationTerm :: Parser Term
+parseApplicationTerm = liftA2 cons applicationOperator nonEmptyApplicationOperand >>= concatApplications
+
+parseAbstractionTerm :: Parser Term
+parseAbstractionTerm = uncurry Abstraction <$> liftA2 (,) (char 'λ' *> variable <* char '.') parseTerm
+
+parseTerm :: Parser Term
+parseTerm = msum [parseAbstractionTerm, parseApplicationTerm, parseVariableTerm]
+
+parse :: String -> Either ParsingError Term
+parse input = fst <$> run parseTerm input

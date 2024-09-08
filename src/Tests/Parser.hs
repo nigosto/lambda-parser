@@ -1,6 +1,7 @@
-module Suites.Parser where
+module Tests.Parser where
 
 import Parser
+import Terms
 import Test.HUnit
 
 parseVariableTest :: Test

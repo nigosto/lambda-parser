@@ -2,13 +2,16 @@ module Interaction where
 
 import Prelude hiding (lookup)
 import Generators (generateTerm, generateNamelessTerm, generateApplicativeTerm)
-import Parser (parseTerm)
-import Stack (emptyStack)
 import Substitution.Named (substitute)
 import Transformers (toNameless, toNamed, toApplicative)
 import Data.Map (empty, lookup)
 import Substitution.Nameless (substituteNameless)
 import BetaRedexes (extractBetaRedexes)
+import Parser ( parse )
+import Libs.Parser (ParsingError)
+
+printResult :: Either ParsingError String -> IO ()
+printResult = either print putStrLn
 
 requestMode :: IO Int
 requestMode = do
@@ -32,19 +35,24 @@ getOutputTermType = putStr "Please enter the type of the output terms (named, na
 getSubstitutionType :: IO TermType
 getSubstitutionType = putStr "Please enter the type of the substitution to be used (named, nameless): " >> parseTermType <$> getLine
 
-doSubstituteNamed :: String -> String -> String -> String
-doSubstituteNamed term var substituteTerm = generateTerm $ substitute (parseTerm term emptyStack) (head var) (parseTerm substituteTerm emptyStack)
+doSubstituteNamed :: String -> String -> String -> Either ParsingError String
+doSubstituteNamed term var substituteTerm = do
+  parsedTerm <- parse term
+  parsedSubstituteTerm <- parse substituteTerm
+  return $ generateTerm $ substitute parsedTerm var parsedSubstituteTerm
 
-doSubstituteNameless :: String -> String -> String -> TermType -> String
-doSubstituteNameless term var substituteTerm outputTermType =
-  let (namelessTerm, context) = toNameless (parseTerm term emptyStack) empty
-      substituteVariable = head var `lookup` context
-  in case substituteVariable of
+doSubstituteNameless :: String -> String -> String -> TermType -> Either ParsingError String
+doSubstituteNameless term var substituteTerm outputTermType = do
+  parsedTerm <- parse term
+  parsedSubstituteTerm <- parse substituteTerm
+  let (namelessTerm, context) = toNameless parsedTerm empty
+      substituteVariable = var `lookup` context
+  return $ case substituteVariable of
     Nothing -> term
     Just index ->
-      let (substituteNamelessTerm, updatedContext) = toNameless (parseTerm substituteTerm emptyStack) context
+      let (substituteNamelessTerm, updatedContext) = toNameless parsedSubstituteTerm context
           result = substituteNameless namelessTerm index substituteNamelessTerm
-       in if outputTermType == Named 
+       in if outputTermType == Named
           then generateTerm $ toNamed result updatedContext
           else generateNamelessTerm result
 
@@ -58,15 +66,15 @@ executeSubstitution = do
       substituteTerm <- putStr "Input substitution term: " >> getLine
       substitutionType <- getSubstitutionType
       if substitutionType == Named
-      then putStrLn $ doSubstituteNamed term var substituteTerm
+      then printResult $ doSubstituteNamed term var substituteTerm
       else do
         outputFormat <- getOutputTermType
-        putStrLn $ doSubstituteNameless term var substituteTerm outputFormat
+        printResult $ doSubstituteNameless term var substituteTerm outputFormat
 
 executeTransformationToApplicative :: IO ()
 executeTransformationToApplicative =
-  putStr "Input term: " >> flip parseTerm emptyStack <$> getLine >>= putStrLn . generateApplicativeTerm . toApplicative
+  putStr "Input term: " >> parse <$> getLine >>= either print (putStrLn . generateApplicativeTerm . toApplicative)
 
 executeBetaRedexesCount :: IO ()
-executeBetaRedexesCount =
-  putStr "Input term: " >> flip parseTerm emptyStack <$> getLine >>= mapM_ (putStrLn . generateTerm) . extractBetaRedexes
+executeBetaRedexesCount = 
+  putStr "Input term: " >> parse <$> getLine >>= either print (mapM_ (putStrLn . generateTerm) . extractBetaRedexes)
